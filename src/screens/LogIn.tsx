@@ -1,38 +1,34 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacity, StatusBar } from 'react-native';
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { useAuth } from '../hooks/useAuth';
 
 export const LogIn = ({ navigation }: any) => {
-    const [value, setValue] = useState({
-        email: '',
-        password: '',
-        error: '',
-    });
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(false);
     const logIn = async () => {
-        if (value.email === '' || value.password === '') {
-            setValue({
-                ...value,
-                error: 'Email and password are required',
-            });
+        if (email === '' || password === '') {
+            setError(!error);
             return;
         }
         try {
-            signInWithEmailAndPassword(auth, value.email, value.password)
-                .then(() => console.log('Login success'))
-                .catch((err) => console.log('Login error', err.message));
-        } catch (error: any) {
-            setValue({
-                ...value,
-                error: error.message,
-            });
+            const res = await signInWithEmailAndPassword(auth, email, password);
+
+            const docSnap = (await getDoc(doc(db, 'users', res.user.uid)));
+            const user = docSnap.data();
+
+            navigation.navigate('Home', {user});
+        } catch (e) {
+            setError(!error);
         }
     };
     return (
         <View style={styles.container}>
-            <Image source={require('../../assets/backImage.png')} style={styles.backImage} />
-            <View style={styles.whiteSheet} />
             <SafeAreaView style={styles.form}>
                 <Text style={styles.title}>Log In</Text>
                 <TextInput
@@ -42,8 +38,8 @@ export const LogIn = ({ navigation }: any) => {
                     keyboardType="email-address"
                     textContentType="emailAddress"
                     autoFocus={true}
-                    value={value.email}
-                    onChangeText={(text) => setValue({ ...value, email: text })}
+                    value={email}
+                    onChangeText={(text) => setEmail(text)}
                 />
                 <TextInput
                     style={styles.input}
@@ -52,12 +48,13 @@ export const LogIn = ({ navigation }: any) => {
                     autoCorrect={false}
                     secureTextEntry={true}
                     textContentType="password"
-                    value={value.password}
-                    onChangeText={(text) => setValue({ ...value, password: text })}
+                    value={password}
+                    onChangeText={(text) => setPassword(text)}
                 />
                 <TouchableOpacity style={styles.button} onPress={logIn}>
                     <Text style={styles.textLogIn}> Log In</Text>
                 </TouchableOpacity>
+                {error && <Text style={{ color: 'red' }}>Something went wrong</Text>}
                 <View style={styles.footerView}>
                     <Text style={styles.textFooter}>Don't have an account? </Text>
                     <TouchableOpacity>

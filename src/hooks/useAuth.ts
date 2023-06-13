@@ -1,29 +1,26 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-shadow */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, createContext } from 'react';
 import {User, getAuth, onAuthStateChanged} from 'firebase/auth';
 import { auth } from '../config/firebase';
-
-// const auth = getAuth();
-
+export const AuthContext = createContext({});
 export const useAuth = () =>{
-    const [user, setUser] = useState<User>();
+    const [currentUser, setCurrentUser] = useState<User>();
 
     useEffect(()=>{
         const unsubcribeFromAuthStateChanged = onAuthStateChanged(auth, (user) =>{
             if (user){
-                setUser(user);
+                setCurrentUser(user);
             }
             else {
-                setUser(undefined);
+                setCurrentUser(undefined);
             }
         });
         return unsubcribeFromAuthStateChanged;
     },[]);
 
     return {
-        user,
+        currentUser,
     };
 };
 

@@ -15,44 +15,6 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 export const UserStack = () => {
   return (
-    // <Tab.Navigator
-    //   initialRouteName="Feed"
-    //   screenOptions={{
-    //     tabBarActiveTintColor: '#e91e63',
-    //   }}
-    // >
-    //   <Tab.Screen
-    //     name="Home"
-    //     component={HomeScreen}
-    //     options={{
-    //       tabBarLabel: 'Home',
-    //       tabBarIcon: ({ color, size }) => (
-    //         <MaterialCommunityIcons name="home" color={color} size={size} />
-    //       ),
-    //     }}
-    //   />
-    //   <Tab.Screen
-    //     name="Profile"
-    //     component={Profile}
-    //     options={{
-    //       tabBarLabel: 'Profile',
-    //       tabBarIcon: ({ color, size }) => (
-    //         <MaterialCommunityIcons name="account" color={color} size={size} />
-    //       ),
-    //     }}
-    //   />
-    //   {/* <Tab.Screen
-    //       name="Messenger"
-    //       component={Messenger}
-    //       options={{
-    //         tabBarLabel: 'Messenger',
-    //         tabBarIcon: ({ color, size }) => (
-    //           <MaterialCommunityIcons name="chat" color={color} size={size} />
-    //         ),
-    //       }}
-    //     /> */}
-    //   {/* <Stack.Screen name="Messenger" component={Messenger}/> */}
-    // </Tab.Navigator>
     <Stack.Navigator
     // screenOptions={{
     //     headerShown: false,

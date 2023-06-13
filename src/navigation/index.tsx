@@ -1,14 +1,16 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {AuthStack} from './authStack';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '../hooks/useAuth';
 import { UserStack } from './userStack';
 export const RootNavigation = () =>{
-    const {user} = useAuth();
+    const {currentUser} = useAuth();
     return (
         <NavigationContainer>
-            {user ? <UserStack /> : <AuthStack />}
+            {/* {currentUser ? <UserStack /> : <AuthStack />} */}
+            <AuthStack />
         </NavigationContainer>
     );
 

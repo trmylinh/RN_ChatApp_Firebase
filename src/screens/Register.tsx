@@ -1,57 +1,71 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-native/no-inline-styles */
 import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
-
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db, storage } from '../config/firebase';
+// import storage from '@react-native-firebase/storage';
+import DocumentPicker from 'react-native-document-picker';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { useAuth } from '../hooks/useAuth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const Register = ({ navigation }: any) => {
-    const [value, setValue] = useState({
-        email: '',
-        password: '',
-        displayName: '',
-        error: '',
-    });
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [displayName, setDisplayName] = useState('');
+    const [photoURL, setPhotoURL] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+
+    const choosePhotoFromLibrary = async () => {
+        const result = await DocumentPicker.pickSingle({
+            allowMultiSelection: false,
+            type: DocumentPicker.types.images,
+        });
+        if (result) {
+            setPhotoURL(result.uri);
+        }
+    };
 
     const register = async () => {
-        if (value.email === '' || value.password === '') {
-            setValue({
-                ...value,
-                error: 'Email and password are required',
-            });
+        if (email === '' || password === '') {
+            setError(!error);
             return;
         }
         try {
-            console.log('auth', auth.currentUser);
-            // await createUserWithEmailAndPassword(auth, value.email, value.password);
-            createUserWithEmailAndPassword(auth, value.email, value.password)
-                .then(() => console.log('Register success'))
-                .catch((err) => console.log('Register error', err.message));
+            // create user -> done but not navigation to LogIn (-> Home)
+            const res = await createUserWithEmailAndPassword(auth, email, password);
 
-            console.log('resgiter press');
-            // navigation.navigate('LogIn');
-        } catch (error: any) {
-            setValue({
-                ...value,
-                error: error.message,
+            const date = new Date().getTime();
+            const storageRef = ref(storage, `${displayName + date}`);
+
+            // create user on firebase -> done
+            await setDoc(doc(db, 'users', res.user.uid),{
+                uid: res.user.uid,
+                displayName,
+                email,
             });
+            // nen luu vao database, chứ không nên getDoc, vì mình đã setDoc r
+            // const docSnap = await getDoc(doc(db, 'users', res.user.uid));
+
+            await setDoc(doc(db, 'userChats',res.user.uid),{});
+            navigation.navigate('LogIn');
+        } catch (e) {
+            setError(!error);
         }
     };
     return (
         <View style={styles.container}>
-            {/* <Image source={require('../../assets/backImage.png')} style={styles.backImage} />
-            <View style={styles.whiteSheet} /> */}
             <SafeAreaView style={styles.form}>
                 <Text style={styles.title}>Register</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Enter display name"
                     autoCapitalize="none"
-                    autoCorrect={false}
-                    secureTextEntry={true}
                     textContentType="name"
-                    value={value.displayName}
-                    onChangeText={(text) => setValue({ ...value, displayName: text })}
+                    value={displayName}
+                    onChangeText={(text) => setDisplayName(text)}
                 />
                 <TextInput
                     style={styles.input}
@@ -59,9 +73,8 @@ export const Register = ({ navigation }: any) => {
                     autoCapitalize="none"
                     keyboardType="email-address"
                     textContentType="emailAddress"
-                    autoFocus={true}
-                    value={value.email}
-                    onChangeText={(text) => setValue({ ...value, email: text })}
+                    value={email}
+                    onChangeText={(text) => setEmail(text)}
                 />
                 <TextInput
                     style={styles.input}
@@ -70,12 +83,16 @@ export const Register = ({ navigation }: any) => {
                     autoCorrect={false}
                     secureTextEntry={true}
                     textContentType="password"
-                    value={value.password}
-                    onChangeText={(text) => setValue({ ...value, password: text })}
+                    value={password}
+                    onChangeText={(text) => setPassword(text)}
                 />
+                <TouchableOpacity style={styles.buttonAdd} onPress={choosePhotoFromLibrary}>
+                    <Text style={styles.textLogIn}>Add an avatar</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={register}>
                     <Text style={styles.textLogIn}>Register</Text>
                 </TouchableOpacity>
+                {error && <Text style={{ color: 'red' }}>Something went wrong</Text>}
                 <View style={styles.footerView}>
                     <Text style={styles.textFooter}>Have an account? </Text>
                     <TouchableOpacity>
@@ -83,7 +100,6 @@ export const Register = ({ navigation }: any) => {
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
-            {/* <StatusBar barStyle="light-content" /> */}
         </View>
     );
 };
@@ -132,6 +148,14 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#f57c00',
+        height: 58,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 40,
+    },
+    buttonAdd: {
+        backgroundColor: '#EECBAD',
         height: 58,
         borderRadius: 10,
         justifyContent: 'center',
