@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 // import Messenger from '../screens/messenger/Messenger';

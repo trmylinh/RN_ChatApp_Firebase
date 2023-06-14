@@ -51,7 +51,7 @@ export default function HomeScreen({ navigation, route }: any) {
   return (
     <View>
       <Search item={user}/>
-      {Object.entries(chats)?.map((chat) =>
+      {Object.entries(chats)?.sort((a,b) => b[1].createdAt - a[1].createdAt).map((chat) =>
       (
         <TouchableOpacity
           onPress={() => handleSelect(chat[1].userInfo)}

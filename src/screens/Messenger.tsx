@@ -9,6 +9,7 @@ import React, {
   useLayoutEffect,
   useCallback,
   useContext,
+  useRef,
 } from 'react';
 import { TouchableOpacity, Text, View, TextInput, StyleSheet } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
@@ -17,6 +18,7 @@ import { ChatContext } from '../../App';
 import { Timestamp, addDoc, arrayUnion, collection, doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../hooks/useAuth';
+import { format } from 'date-fns';
 
 export default function Messenger({ navigation, route }: any) {
   const { user } = route.params;
@@ -24,6 +26,7 @@ export default function Messenger({ navigation, route }: any) {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const { data }: any = useContext(ChatContext);
   const [text, setText] = useState('');
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -43,61 +46,44 @@ export default function Messenger({ navigation, route }: any) {
     };
   }, [data.chatId]);
 
-  // const onSend = useCallback(async (messages = []) => {
-  //   const { _id, date, text, senderId } = messages[0];
-  //   setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
-
-  //   await updateDoc(doc(db, 'chats', data.chatId), {
-  //     messages: arrayUnion({
-  //       _id: uuidv4(),
-  //       text,
-  //       senderId: user?.uid,
-  //       // user,
-  //       date: Timestamp.now(),
-  //     }),
-  //   });
-
-  //   await updateDoc(doc(db, 'userChats', user?.uid), {
-  //     [data.chatId + '.lastMessage']: {
-  //       text,
-  //     },
-  //     [data.chatId + '.date']: serverTimestamp(),
-  //   });
-
-  //   await updateDoc(doc(db, 'userChats', data.user?.uid), {
-  //     [data.chatId + '.lastMessage']: {
-  //       text,
-  //     },
-  //     [data.chatId + '.date']: serverTimestamp(),
-  //   });
-
-  // }, [data, user]);
-
-
 
   const onSend = useCallback(async (messages = []) => {
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
 
     await updateDoc(doc(db, 'chats', data.chatId), {
       messages: arrayUnion({
-              _id: uuidv4(),
-              text,
-              date: Timestamp.now(),
-              user: {
-                _id: user?.uid,
-                name: user?.displayName,
-                avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
-              },
-            }),
+        _id: uuidv4(),
+        text,
+        createdAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        user: {
+          _id: user?.uid,
+          name: user?.displayName,
+          avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
+        },
+      }),
     });
 
-  }, [data.chatId, text, user]);
+    await updateDoc(doc(db, 'userChats', user?.uid), {
+      [data.chatId + '.lastMessage']: {
+        text,
+      },
+      [data.chatId + '.date']: serverTimestamp(),
+    });
+
+    await updateDoc(doc(db, 'userChats', data.user?.uid), {
+      [data.chatId + '.lastMessage']: {
+        text,
+      },
+      [data.chatId + '.date']: serverTimestamp(),
+    });
+
+  }, [data, text, user]);
 
   return (
     <GiftedChat
       text={text}
       onInputTextChanged={text => setText(text)}
-      messages={messages}
+      messages={messages.sort((a, b) => Date.parse(b.createdAt?.toString()) - Date.parse(a.createdAt?.toString()))}
       showAvatarForEveryMessage={false}
       showUserAvatar={true}
       onSend={(messages: any) => onSend(messages)}
@@ -111,14 +97,5 @@ export default function Messenger({ navigation, route }: any) {
     />
   );
 }
-const styles = StyleSheet.create({
-  viewMess: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    position: 'absolute',
-    bottom: 1,
-  },
-});
 
 
