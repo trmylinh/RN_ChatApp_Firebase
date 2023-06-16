@@ -5,20 +5,15 @@ import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacit
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { app, auth, db, storage } from '../config/firebase';
-// import storage from '@react-native-firebase/storage';
-// import firestore from '@react-native-firebase/firestore';
 
 import DocumentPicker from 'react-native-document-picker';
-import { ref, uploadBytesResumable, getDownloadURL, uploadBytes } from 'firebase/storage';
-import { useAuth } from '../hooks/useAuth';
+import { ref,getDownloadURL, uploadBytes } from 'firebase/storage';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const Register = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [photoURL, setPhotoURL] = useState('');
-    const [uploading, setUploading] = useState(false);
-    const [transferred, setTransferred] = useState(0);
     const [error, setError] = useState(false);
 
     const choosePhotoFromLibrary = async () => {
@@ -73,8 +68,6 @@ export const Register = ({ navigation }: any) => {
 
                         //create empty user chats on firestore
                         await setDoc(doc(db, 'userChats', res.user.uid), {});
-
-                        navigation.navigate('LogIn');
                     } catch (e: any) {
                         console.log(e.message);
                     }
@@ -117,9 +110,6 @@ export const Register = ({ navigation }: any) => {
                 />
                 <TouchableOpacity style={styles.buttonAdd} onPress={choosePhotoFromLibrary}>
                     <Text style={styles.textLogIn}>Add an avatar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonAdd}>
-                    <Text style={styles.textLogIn}>Upload</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={register}>
                     <Text style={styles.textLogIn}>Register</Text>

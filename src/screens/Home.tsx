@@ -11,7 +11,6 @@ import { ChatContext } from '../../App';
 import { useAuth } from '../hooks/useAuth';
 
 export default function HomeScreen({ navigation}: any) {
-  // const { user } = route.params;
   const { currentUser } = useAuth();
   const [chats, setChats] = useState<User | []>([]);
   const { dispatch }: any = useContext(ChatContext);
@@ -126,7 +125,6 @@ const styles = StyleSheet.create({
   },
   textMessage: {
     color: 'black',
-    // color: colors.inactive
     fontSize: 15,
   },
   timeView: {

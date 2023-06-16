@@ -4,8 +4,6 @@ import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacit
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { useAuth } from '../hooks/useAuth';
 
 export const LogIn = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
@@ -19,10 +17,6 @@ export const LogIn = ({ navigation }: any) => {
         try {
             const res = await signInWithEmailAndPassword(auth, email, password);
 
-            const docSnap = (await getDoc(doc(db, 'users', res.user.uid)));
-            const user = docSnap.data();
-
-            navigation.navigate('Home', {user});
         } catch (e) {
             setError(!error);
         }

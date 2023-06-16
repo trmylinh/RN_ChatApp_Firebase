@@ -8,8 +8,6 @@ import { auth } from '../config/firebase';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Profile({navigation} : any) {
-  // const {user} = route.params;
-  // console.log('auth sign out', auth);
   const {currentUser} = useAuth();
   const onSignOut = () => {
     signOut(auth)

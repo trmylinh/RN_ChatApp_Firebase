@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { View, Text, TextInput, Image, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
