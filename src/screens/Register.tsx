@@ -4,10 +4,12 @@
 import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth, db, storage } from '../config/firebase';
+import { app, auth, db, storage } from '../config/firebase';
 // import storage from '@react-native-firebase/storage';
+// import firestore from '@react-native-firebase/firestore';
+
 import DocumentPicker from 'react-native-document-picker';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { useAuth } from '../hooks/useAuth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const Register = ({ navigation }: any) => {
@@ -15,7 +17,8 @@ export const Register = ({ navigation }: any) => {
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [photoURL, setPhotoURL] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [transferred, setTransferred] = useState(0);
     const [error, setError] = useState(false);
 
     const choosePhotoFromLibrary = async () => {
@@ -28,6 +31,61 @@ export const Register = ({ navigation }: any) => {
         }
     };
 
+    const uploadImage = async () => {
+        if (!photoURL) {
+            return null;
+        }
+        const uploadUri = photoURL;
+        let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+
+        // add timestamp to filename
+        const extension = filename.split('.').pop();
+        const name = filename.split('.').slice(0, -1).join('.');
+        filename = name + Date.now() + '.' + extension;
+
+        setUploading(true);
+        setTransferred(0);
+
+        // const storageRef = storage().ref(`photos/${filename}`);
+        // const task = storageRef.putFile(uploadUri);
+
+        const storageRef = ref(storage, `photos/${filename}` );
+        const img = await fetch(photoURL);
+        const bytes = await img.blob();
+        const r = await uploadBytes(storageRef, bytes);
+        console.log('r', r.metadata.fullPath);
+
+        // task.on('state_changed', (taskSnapshot) => {
+        //     console.log(
+        //         `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+        //     );
+
+        //     setTransferred(
+        //         Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+        //         100,
+        //     );
+        // });
+
+        // try {
+        //     await task;
+
+        //     const url = await storageRef.getDownloadURL();
+
+        //     setUploading(false);
+        //     setPhotoURL('');
+
+        //     return url;
+        // } catch (e: any) {
+        //     console.log('error uploading', e.message);
+        //     return null;
+        // }
+    };
+
+    const handleUpload = async () => {
+        const imageUrl = await uploadImage();
+        console.log('Image URL: ' + imageUrl);
+    };
+
     const register = async () => {
         if (email === '' || password === '') {
             setError(!error);
@@ -37,11 +95,12 @@ export const Register = ({ navigation }: any) => {
             // create user -> done but not navigation to LogIn (-> Home)
             const res = await createUserWithEmailAndPassword(auth, email, password);
 
-            const date = new Date().getTime();
-            const storageRef = ref(storage, `${displayName + date}`);
+            // const date = new Date().getTime();
+            // const storageRef = ref(storage, `${displayName + date}`);
+
 
             // create user on firebase -> done
-            await setDoc(doc(db, 'users', res.user.uid),{
+            await setDoc(doc(db, 'users', res.user.uid), {
                 uid: res.user.uid,
                 displayName,
                 email,
@@ -49,7 +108,7 @@ export const Register = ({ navigation }: any) => {
             // nen luu vao database, chứ không nên getDoc, vì mình đã setDoc r
             // const docSnap = await getDoc(doc(db, 'users', res.user.uid));
 
-            await setDoc(doc(db, 'userChats',res.user.uid),{});
+            await setDoc(doc(db, 'userChats', res.user.uid), {});
             navigation.navigate('LogIn');
         } catch (e) {
             setError(!error);
@@ -88,6 +147,9 @@ export const Register = ({ navigation }: any) => {
                 />
                 <TouchableOpacity style={styles.buttonAdd} onPress={choosePhotoFromLibrary}>
                     <Text style={styles.textLogIn}>Add an avatar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.buttonAdd} onPress={handleUpload}>
+                    <Text style={styles.textLogIn}>Upload</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={register}>
                     <Text style={styles.textLogIn}>Register</Text>
