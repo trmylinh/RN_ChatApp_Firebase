@@ -49,7 +49,7 @@ export default function Search({item} : any) {
                         [combinedId + '.userInfo']: {
                             uid: user?.uid,
                             displayName: user?.displayName,
-                            // photoURL: user?.photoURL,
+                            photoURL: user?.photoURL,
                         },
                         [combinedId + '.date']: serverTimestamp(),
                     });
@@ -58,7 +58,7 @@ export default function Search({item} : any) {
                         [combinedId + '.userInfo']: {
                             uid: item?.uid,
                             displayName: item?.displayName,
-                            // photoURL: user?.photoURL,
+                            photoURL: item?.photoURL,
                         },
                         [combinedId + '.date']: serverTimestamp(),
                     });
@@ -86,7 +86,7 @@ export default function Search({item} : any) {
             {user && <TouchableOpacity onPress={handleSelect} style={styles.resultView}>
                 <Image
                     style={styles.imgView}
-                    source={{uri: 'https://randomuser.me/api/portraits/men/99.jpg'}}
+                    source={{uri: `${user?.photoURL}`}}
 
                 />
                 <Text style={styles.textResult}>{user?.displayName}</Text>

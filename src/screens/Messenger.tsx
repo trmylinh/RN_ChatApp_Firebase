@@ -58,7 +58,7 @@ export default function Messenger({ navigation, route }: any) {
         user: {
           _id: user?.uid,
           name: user?.displayName,
-          avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
+          avatar: user?.photoURL,
         },
       }),
     });
@@ -92,7 +92,6 @@ export default function Messenger({ navigation, route }: any) {
       }}
       user={{
         _id: currentUser?.uid,
-        avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
       }}
     />
   );

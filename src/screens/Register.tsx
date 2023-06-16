@@ -31,85 +31,55 @@ export const Register = ({ navigation }: any) => {
         }
     };
 
-    const uploadImage = async () => {
-        if (!photoURL) {
-            return null;
-        }
-        const uploadUri = photoURL;
-        let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
-
-        // add timestamp to filename
-        const extension = filename.split('.').pop();
-        const name = filename.split('.').slice(0, -1).join('.');
-        filename = name + Date.now() + '.' + extension;
-
-        setUploading(true);
-        setTransferred(0);
-
-        // const storageRef = storage().ref(`photos/${filename}`);
-        // const task = storageRef.putFile(uploadUri);
-
-        const storageRef = ref(storage, `photos/${filename}` );
-        const img = await fetch(photoURL);
-        const bytes = await img.blob();
-        const r = await uploadBytes(storageRef, bytes);
-        console.log('r', r.metadata.fullPath);
-
-        // task.on('state_changed', (taskSnapshot) => {
-        //     console.log(
-        //         `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-        //     );
-
-        //     setTransferred(
-        //         Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-        //         100,
-        //     );
-        // });
-
-        // try {
-        //     await task;
-
-        //     const url = await storageRef.getDownloadURL();
-
-        //     setUploading(false);
-        //     setPhotoURL('');
-
-        //     return url;
-        // } catch (e: any) {
-        //     console.log('error uploading', e.message);
-        //     return null;
-        // }
-    };
-
-    const handleUpload = async () => {
-        const imageUrl = await uploadImage();
-        console.log('Image URL: ' + imageUrl);
-    };
-
     const register = async () => {
         if (email === '' || password === '') {
             setError(!error);
             return;
         }
         try {
-            // create user -> done but not navigation to LogIn (-> Home)
+            // create user
             const res = await createUserWithEmailAndPassword(auth, email, password);
 
-            // const date = new Date().getTime();
-            // const storageRef = ref(storage, `${displayName + date}`);
+            //upload image
+            if (!photoURL) {
+                return null;
+            }
+            const uploadUri = photoURL;
+            let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+            // add timestamp to filename
+            const extension = filename.split('.').pop();
+            const name = filename.split('.').slice(0, -1).join('.');
+            filename = name + Date.now() + '.' + extension;
 
+            const storageRef = ref(storage, `photos/${filename}`);
+            const img = await fetch(photoURL);
+            const bytes = await img.blob();
+            await uploadBytes(storageRef, bytes).then(() => {
+                getDownloadURL(storageRef).then(async (downloadURL) => {
+                    try {
+                        //Update profile
+                        await updateProfile(res.user, {
+                            displayName,
+                            photoURL: downloadURL,
+                        });
 
-            // create user on firebase -> done
-            await setDoc(doc(db, 'users', res.user.uid), {
-                uid: res.user.uid,
-                displayName,
-                email,
+                        //create user on firestore
+                        await setDoc(doc(db, 'users', res.user.uid), {
+                            uid: res.user.uid,
+                            displayName,
+                            email,
+                            photoURL: downloadURL,
+                        });
+
+                        //create empty user chats on firestore
+                        await setDoc(doc(db, 'userChats', res.user.uid), {});
+
+                        navigation.navigate('LogIn');
+                    } catch (e: any) {
+                        console.log(e.message);
+                    }
+                });
             });
-            // nen luu vao database, chứ không nên getDoc, vì mình đã setDoc r
-            // const docSnap = await getDoc(doc(db, 'users', res.user.uid));
-
-            await setDoc(doc(db, 'userChats', res.user.uid), {});
-            navigation.navigate('LogIn');
         } catch (e) {
             setError(!error);
         }
@@ -148,7 +118,7 @@ export const Register = ({ navigation }: any) => {
                 <TouchableOpacity style={styles.buttonAdd} onPress={choosePhotoFromLibrary}>
                     <Text style={styles.textLogIn}>Add an avatar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonAdd} onPress={handleUpload}>
+                <TouchableOpacity style={styles.buttonAdd}>
                     <Text style={styles.textLogIn}>Upload</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={register}>

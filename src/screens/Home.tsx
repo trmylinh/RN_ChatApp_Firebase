@@ -61,7 +61,7 @@ export default function HomeScreen({ navigation, route }: any) {
           <View>
             <Image
               style={styles.imgView}
-              source={{ uri: 'https://randomuser.me/api/portraits/men/60.jpg' }}
+              source={{ uri: `${chat[1].userInfo?.photoURL}`}}
             />
             <Text style={styles.textUnread}>
               3
