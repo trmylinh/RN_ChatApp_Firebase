@@ -5,13 +5,18 @@ import React, { useLayoutEffect } from 'react';
 import { Text, TouchableOpacity, View} from 'react-native';
 import { signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import { useAuth } from '../hooks/useAuth';
 
-export default function Profile({navigation, route} : any) {
-  const {user} = route.params;
-  console.log('auth sign out', auth);
+export default function Profile({navigation} : any) {
+  // const {user} = route.params;
+  // console.log('auth sign out', auth);
+  const {currentUser} = useAuth();
   const onSignOut = () => {
-    signOut(auth).catch(error => console.log('Error logging out: ', error));
-    // navigation.navigate('LogIn');
+    signOut(auth)
+    .then(()=>{
+      console.log('log out success');
+    })
+    .catch(error => console.log('Error logging out: ', error));
   };
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -29,7 +34,7 @@ export default function Profile({navigation, route} : any) {
   }, [navigation]);
   return (
     <View>
-      <Text>Profile {user?.displayName}</Text>
+      <Text>Profile {currentUser?.displayName}</Text>
     </View>
   );
 }

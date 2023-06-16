@@ -9,8 +9,8 @@ export const RootNavigation = () =>{
     const {currentUser} = useAuth();
     return (
         <NavigationContainer>
-            {/* {currentUser ? <UserStack /> : <AuthStack />} */}
-            <AuthStack />
+            {currentUser ? <UserStack /> : <AuthStack />}
+            {/* <AuthStack /> */}
         </NavigationContainer>
     );
 

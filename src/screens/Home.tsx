@@ -10,8 +10,8 @@ import { User } from 'firebase/auth';
 import { ChatContext } from '../../App';
 import { useAuth } from '../hooks/useAuth';
 
-export default function HomeScreen({ navigation, route }: any) {
-  const { user } = route.params;
+export default function HomeScreen({ navigation}: any) {
+  // const { user } = route.params;
   const { currentUser } = useAuth();
   const [chats, setChats] = useState<User | []>([]);
   const { dispatch }: any = useContext(ChatContext);
@@ -35,13 +35,13 @@ export default function HomeScreen({ navigation, route }: any) {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={() => {
-          navigation.navigate('Profile', { user });
+          navigation.navigate('Profile');
         }}>
-          {user ?
+          {currentUser ?
             <View style={{ flexDirection: 'row' }}>
-              <Text style={{ marginVertical: 10 }}>{user.displayName}</Text>
+              <Text style={{ marginVertical: 10 }}>{currentUser.displayName}</Text>
               <Image
-                source={{ uri: `${user.photoURL}` }}
+                source={{ uri: `${currentUser.photoURL}` }}
                 style={styles.imgAvt}
               />
             </View>
@@ -49,16 +49,16 @@ export default function HomeScreen({ navigation, route }: any) {
         </TouchableOpacity>
       ),
     });
-  }, [chats, navigation, user]);
+  }, [chats, currentUser, navigation]);
 
-  const handleSelect = (u: any) => {
-    dispatch({ type: 'CHANGE_USER', payload: u });
-    navigation.navigate('Messenger', { user });
+  const handleSelect = (user: any) => {
+    dispatch({ type: 'CHANGE_USER', payload: user });
+    navigation.navigate('Messenger', {user});
   };
 
   return (
     <View>
-      <Search item={user} />
+      <Search item={currentUser} />
       {Object.entries(chats)?.sort((a, b) => b[1].createdAt - a[1].createdAt).map((chat) =>
       (
         <TouchableOpacity

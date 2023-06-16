@@ -55,36 +55,37 @@ export default function Messenger({ navigation, route }: any) {
 
 
   const onSend = useCallback(async (messages = []) => {
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
+    if (currentUser) {
+      setMessages(previousMessages => GiftedChat.append(previousMessages, messages));
 
-    await updateDoc(doc(db, 'chats', data.chatId), {
-      messages: arrayUnion({
-        _id: uuidv4(),
-        text,
-        createdAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-        user: {
-          _id: user?.uid,
-          name: user?.displayName,
-          avatar: user?.photoURL,
+      await updateDoc(doc(db, 'chats', data.chatId), {
+        messages: arrayUnion({
+          _id: uuidv4(),
+          text,
+          createdAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+          user: {
+            _id: currentUser?.uid,
+            name: currentUser?.displayName,
+            avatar: currentUser?.photoURL,
+          },
+        }),
+      });
+
+      await updateDoc(doc(db, 'userChats', currentUser.uid), {
+        [data.chatId + '.lastMessage']: {
+          text,
         },
-      }),
-    });
+        [data.chatId + '.date']: serverTimestamp(),
+      });
 
-    await updateDoc(doc(db, 'userChats', user?.uid), {
-      [data.chatId + '.lastMessage']: {
-        text,
-      },
-      [data.chatId + '.date']: serverTimestamp(),
-    });
-
-    await updateDoc(doc(db, 'userChats', data.user?.uid), {
-      [data.chatId + '.lastMessage']: {
-        text,
-      },
-      [data.chatId + '.date']: serverTimestamp(),
-    });
-
-  }, [data, text, user]);
+      await updateDoc(doc(db, 'userChats', data.user?.uid), {
+        [data.chatId + '.lastMessage']: {
+          text,
+        },
+        [data.chatId + '.date']: serverTimestamp(),
+      });
+    }
+  }, [data, text, currentUser]);
 
   return (
     <GiftedChat
