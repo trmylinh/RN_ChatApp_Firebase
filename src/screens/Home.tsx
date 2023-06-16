@@ -37,7 +37,15 @@ export default function HomeScreen({ navigation, route }: any) {
         <TouchableOpacity onPress={() => {
           navigation.navigate('Profile', { user });
         }}>
-          {user ? <Text style={{ marginRight: 20 }}>{user.displayName}</Text> : null}
+          {user ?
+            <View style={{ flexDirection: 'row' }}>
+              <Text style={{ marginVertical: 10 }}>{user.displayName}</Text>
+              <Image
+                source={{ uri: `${user.photoURL}` }}
+                style={styles.imgAvt}
+              />
+            </View>
+            : null}
         </TouchableOpacity>
       ),
     });
@@ -50,8 +58,8 @@ export default function HomeScreen({ navigation, route }: any) {
 
   return (
     <View>
-      <Search item={user}/>
-      {Object.entries(chats)?.sort((a,b) => b[1].createdAt - a[1].createdAt).map((chat) =>
+      <Search item={user} />
+      {Object.entries(chats)?.sort((a, b) => b[1].createdAt - a[1].createdAt).map((chat) =>
       (
         <TouchableOpacity
           onPress={() => handleSelect(chat[1].userInfo)}
@@ -61,7 +69,7 @@ export default function HomeScreen({ navigation, route }: any) {
           <View>
             <Image
               style={styles.imgView}
-              source={{ uri: `${chat[1].userInfo?.photoURL}`}}
+              source={{ uri: `${chat[1].userInfo?.photoURL}` }}
             />
             <Text style={styles.textUnread}>
               3
@@ -73,7 +81,6 @@ export default function HomeScreen({ navigation, route }: any) {
           </View>
           <View style={styles.timeView}>
             <Text style={styles.textTime}>4 minutes ago</Text>
-
           </View>
         </TouchableOpacity>
       )
@@ -90,6 +97,14 @@ const styles = StyleSheet.create({
   imgView: {
     width: 60,
     height: 60,
+    resizeMode: 'cover',
+    borderRadius: 40,
+    marginRight: 15,
+    marginStart: 10,
+  },
+  imgAvt: {
+    width: 35,
+    height: 35,
     resizeMode: 'cover',
     borderRadius: 40,
     marginRight: 15,

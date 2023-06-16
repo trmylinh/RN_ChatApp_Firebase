@@ -11,7 +11,7 @@ import React, {
   useContext,
   useRef,
 } from 'react';
-import { TouchableOpacity, Text, View, TextInput, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, View, TextInput, StyleSheet, Image } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { auth, db } from '../config/firebase';
 import { ChatContext } from '../../App';
@@ -30,8 +30,15 @@ export default function Messenger({ navigation, route }: any) {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text>{data.user?.displayName}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ flexDirection: 'row' }}
+        >
+          <Text style={{ marginVertical: 10 }}>{data.user?.displayName}</Text>
+          <Image
+            source={{ uri: `${data.user?.photoURL}` }}
+            style={styles.imgAvt}
+          />
         </TouchableOpacity>
       ),
     });
@@ -96,5 +103,16 @@ export default function Messenger({ navigation, route }: any) {
     />
   );
 }
+const styles = StyleSheet.create({
+  imgAvt: {
+    width: 35,
+    height: 35,
+    resizeMode: 'cover',
+    borderRadius: 40,
+    marginRight: 15,
+    marginStart: 10,
+  },
+}
+);
 
 
