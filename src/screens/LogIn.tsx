@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacit
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const LogIn = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
@@ -15,8 +16,8 @@ export const LogIn = ({ navigation }: any) => {
             return;
         }
         try {
-            const res = await signInWithEmailAndPassword(auth, email, password);
-
+            const res: any = await signInWithEmailAndPassword(auth, email, password);
+           //luu redux
         } catch (e) {
             setError(!error);
         }

@@ -23,7 +23,7 @@ export const AuthStack = () => {
             {/* <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: true }} />
             <Stack.Screen name="Profile" component={Profile} options={{ headerShown: true }}/>
             <Stack.Screen name="Messenger" component={Messenger} options={{ headerShown: true }}/> */}
-            {/* <Stack.Screen name="Messenger" component={Messenger} /> */}
+            {/* {/* <Stack.Screen name="Messenger" component={Messenger} /> */}
         </Stack.Navigator>
     );
 };
