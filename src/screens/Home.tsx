@@ -9,15 +9,17 @@ import { db } from '../config/firebase';
 import { User } from 'firebase/auth';
 import { ChatContext } from '../../App';
 import { useAuth } from '../hooks/useAuth';
+import { useSelector } from 'react-redux';
 
 export default function HomeScreen({ navigation}: any) {
   const { currentUser } = useAuth();
   const [chats, setChats] = useState<User | []>([]);
-  const { dispatch }: any = useContext(ChatContext);
+  const { dispatch}: any = useContext(ChatContext);
+  const user = useSelector((state: any) => state.login.user);
   useEffect(() => {
     const getChats = () => {
-      if (currentUser) {
-        const unsubcribe = onSnapshot(doc(db, 'userChats', currentUser?.uid), (e: DocumentData) => {
+      if (user) {
+        const unsubcribe = onSnapshot(doc(db, 'userChats', user?.uid), (e: DocumentData) => {
           setChats(e.data());
         });
         return () => {
@@ -26,9 +28,9 @@ export default function HomeScreen({ navigation}: any) {
 
       }
     };
-    currentUser?.uid && getChats();
+    user?.uid && getChats();
 
-  }, [currentUser]);
+  }, [user]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -36,11 +38,11 @@ export default function HomeScreen({ navigation}: any) {
         <TouchableOpacity onPress={() => {
           navigation.navigate('Profile');
         }}>
-          {currentUser ?
+          {user ?
             <View style={{ flexDirection: 'row' }}>
-              <Text style={{ marginVertical: 10 }}>{currentUser.displayName}</Text>
+              <Text style={{ marginVertical: 10 }}>{user.displayName}</Text>
               <Image
-                source={{ uri: `${currentUser.photoURL}` }}
+                source={{ uri: `${user.photoURL}` }}
                 style={styles.imgAvt}
               />
             </View>
@@ -48,7 +50,7 @@ export default function HomeScreen({ navigation}: any) {
         </TouchableOpacity>
       ),
     });
-  }, [chats, currentUser, navigation]);
+  }, [chats, user, navigation]);
 
   const handleSelect = (user: any) => {
     dispatch({ type: 'CHANGE_USER', payload: user });
@@ -57,7 +59,7 @@ export default function HomeScreen({ navigation}: any) {
 
   return (
     <View>
-      <Search item={currentUser} />
+      <Search item={user} />
       {chats && Object.entries(chats)?.sort((a, b) => b[1].createdAt - a[1].createdAt).map((chat) =>
       (
         <TouchableOpacity

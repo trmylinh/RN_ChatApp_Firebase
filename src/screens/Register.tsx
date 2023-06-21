@@ -73,6 +73,7 @@ export const Register = ({ navigation }: any) => {
                     }
                 });
             });
+            navigation.navigate('LogIn');
         } catch (e) {
             setError(!error);
         }

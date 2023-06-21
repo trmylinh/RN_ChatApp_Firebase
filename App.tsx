@@ -10,34 +10,38 @@
 import React, { Children, createContext, useReducer } from 'react';
 import { RootNavigation } from './src/navigation';
 import { useAuth } from './src/hooks/useAuth';
+import { Provider, useSelector } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistor, store } from './store';
 export const AuthContext = createContext({});
 export const ChatContext = createContext({});
-const AuthProvider = ({children}: any) =>{
-  const {currentUser} = useAuth();
+
+const AuthProvider = ({ children }: any) => {
+  const { currentUser } = useAuth();
   return (
-    <AuthContext.Provider value={{currentUser}}>
+    <AuthContext.Provider value={{currentUser }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-const ChatProvider = ({children}: any) =>{
-  const {currentUser} = useAuth();
+const ChatProvider = ({ children }: any) => {
+  const currentUser = useSelector((state: any) => state.login.user);
   const INITIAL_STATE = {
     chatId: 'null',
     user: {},
   };
 
-  const chatReducer = (state: any, action: any) =>{
-    switch (action.type){
+  const chatReducer = (state: any, action: any) => {
+    switch (action.type) {
       case 'CHANGE_USER':
         return {
           user: action.payload,
           chatId: currentUser ?
-          ( currentUser?.uid > action.payload.uid
-          ? currentUser?.uid + action.payload.uid
-          : action.payload.uid + currentUser?.uid )
-          : null,
+            (currentUser?.uid > action.payload.uid
+              ? currentUser?.uid + action.payload.uid
+              : action.payload.uid + currentUser?.uid)
+            : null,
         };
       default: return state;
     }
@@ -45,7 +49,7 @@ const ChatProvider = ({children}: any) =>{
 
   const [state, dispatch] = useReducer(chatReducer, INITIAL_STATE);
   return (
-    <ChatContext.Provider value={{data: state, dispatch}}>
+    <ChatContext.Provider value={{ data: state, dispatch }}>
       {children}
     </ChatContext.Provider>
   );
@@ -54,11 +58,15 @@ const ChatProvider = ({children}: any) =>{
 
 function App(): JSX.Element {
   return (
-    <AuthProvider>
-      <ChatProvider>
-        <RootNavigation />
-      </ChatProvider>
-    </AuthProvider>
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <AuthProvider>
+          <ChatProvider>
+            <RootNavigation />
+          </ChatProvider>
+        </AuthProvider>
+      </PersistGate>
+    </Provider>
   );
 }
 

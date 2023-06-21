@@ -1,17 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { View, Text, TextInput, Image, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+// import { useAuth } from '../../hooks/useAuth';
 import { DocumentData, collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
 
 export default function Search({item} : any) {
     const [username, setUsername] = useState('');
     const [err, setErr] = useState(false);
     const [user, setUser] = useState<DocumentData | null>(null);
-
-    const { currentUser } = useAuth();
+    const currentUser = useSelector((state: any) => state.login.user);
+    // const { currentUser } = useAuth();
 
     const handleSearch = async () => {
         const q = query(

@@ -14,19 +14,22 @@ import React, {
 import { TouchableOpacity, Text, View, TextInput, StyleSheet, Image } from 'react-native';
 import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { auth, db } from '../config/firebase';
-import { ChatContext } from '../../App';
+import { AuthContext, ChatContext } from '../../App';
 import { Timestamp, addDoc, arrayUnion, collection, doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../hooks/useAuth';
 import { format } from 'date-fns';
+import { useSelector } from 'react-redux';
 
-export default function Messenger({ navigation, route }: any) {
-  const { user } = route.params;
-  const { currentUser } = useAuth();
+export default function Messenger({ navigation, route}: any) {
+  const {user} = route.params;
+  // const { currentUser } = useAuth();
   const [messages, setMessages] = useState<IMessage[]>([]);
   const { data }: any = useContext(ChatContext);
   const [text, setText] = useState('');
-
+  const currentUser = useSelector((state: any) => state.login.user);
+  console.log('message', messages);
+  console.log('data', data);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (

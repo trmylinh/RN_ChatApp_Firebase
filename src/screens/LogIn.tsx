@@ -1,23 +1,26 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { View, Text, StyleSheet, Image, SafeAreaView, TextInput, TouchableOpacity, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { AuthContext } from '../hooks/useAuth';
 export const LogIn = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(false);
+    const dispatch = useDispatch();
     const logIn = async () => {
         if (email === '' || password === '') {
             setError(!error);
             return;
         }
         try {
-            const res: any = await signInWithEmailAndPassword(auth, email, password);
-           //luu redux
+            const res = await signInWithEmailAndPassword(auth, email, password);
+            //luu redux
+            dispatch({ type: 'LOGIN', payload: res.user });
         } catch (e) {
             setError(!error);
         }
