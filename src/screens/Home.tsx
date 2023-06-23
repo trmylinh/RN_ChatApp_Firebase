@@ -11,10 +11,10 @@ import { ChatContext } from '../../App';
 import { useAuth } from '../hooks/useAuth';
 import { useSelector } from 'react-redux';
 
-export default function HomeScreen({ navigation}: any) {
+export default function HomeScreen({ navigation }: any) {
   const { currentUser } = useAuth();
   const [chats, setChats] = useState<User | []>([]);
-  const { dispatch}: any = useContext(ChatContext);
+  const { dispatch }: any = useContext(ChatContext);
   const user = useSelector((state: any) => state.login.user);
   useEffect(() => {
     const getChats = () => {
@@ -54,7 +54,7 @@ export default function HomeScreen({ navigation}: any) {
 
   const handleSelect = (user: any) => {
     dispatch({ type: 'CHANGE_USER', payload: user });
-    navigation.navigate('Messenger', {user});
+    navigation.navigate('Messenger', { user });
   };
 
   return (
@@ -76,9 +76,9 @@ export default function HomeScreen({ navigation}: any) {
               3
             </Text>
           </View>
-          <View style={{ flexDirection: 'column' }}>
+          <View style={styles.viewText}>
             <Text style={styles.textName}>{chat[1].userInfo.displayName}</Text>
-            <Text style={styles.textMessage}>{chat[1].lastMessage?.text}</Text>
+            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.textMessage}>{chat[1].lastMessage?.text}</Text>
           </View>
           <View style={styles.timeView}>
             <Text style={styles.textTime}>4 minutes ago</Text>
@@ -134,6 +134,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-end',
+  },
+  viewText: {
+    flexDirection: 'column',
+    flex: 2,
   },
   textTime: {
     color: 'black',

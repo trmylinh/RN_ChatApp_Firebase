@@ -12,7 +12,7 @@ import React, {
   useRef,
 } from 'react';
 import { TouchableOpacity, Text, View, TextInput, StyleSheet, Image } from 'react-native';
-import { GiftedChat, IMessage } from 'react-native-gifted-chat';
+import { GiftedChat, IMessage, InputToolbar } from 'react-native-gifted-chat';
 import { auth, db } from '../config/firebase';
 import { AuthContext, ChatContext } from '../../App';
 import { Timestamp, addDoc, arrayUnion, collection, doc, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
@@ -20,16 +20,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '../hooks/useAuth';
 import { format } from 'date-fns';
 import { useSelector } from 'react-redux';
-
-export default function Messenger({ navigation, route}: any) {
-  const {user} = route.params;
+import Icon from 'react-native-vector-icons/FontAwesome';
+import DocumentPicker from 'react-native-document-picker';
+export default function Messenger({ navigation, route }: any) {
+  const { user } = route.params;
   // const { currentUser } = useAuth();
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const { data }: any = useContext(ChatContext);
+  const [image, setImage] = useState('');
   const [text, setText] = useState('');
+  const [isHidden, setIsHidden] = useState(true);
+  const { data }: any = useContext(ChatContext);
   const currentUser = useSelector((state: any) => state.login.user);
-  console.log('message', messages);
-  console.log('data', data);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -71,6 +72,7 @@ export default function Messenger({ navigation, route}: any) {
             name: currentUser?.displayName,
             avatar: currentUser?.photoURL,
           },
+          image: image,
         }),
       });
 
@@ -87,8 +89,29 @@ export default function Messenger({ navigation, route}: any) {
         },
         [data.chatId + '.date']: serverTimestamp(),
       });
+      setImage('');
     }
-  }, [data, text, currentUser]);
+  }, [data, text, currentUser, image]);
+
+  const choosePhotoFromLibrary = async () => {
+    const result = await DocumentPicker.pickSingle({
+      allowMultiSelection: false,
+      type: DocumentPicker.types.images,
+    });
+    if (result) {
+      setIsHidden(true);
+      setImage(result.uri);
+    }
+  };
+
+  const renderCustomButton = () => {
+    return (
+      <TouchableOpacity onPress={choosePhotoFromLibrary}>
+        <Icon name="image" size={20} color="#999999" style={{ margin: 10 }} />
+      </TouchableOpacity>
+    );
+  };
+
 
   return (
     <GiftedChat
@@ -98,6 +121,7 @@ export default function Messenger({ navigation, route}: any) {
       showAvatarForEveryMessage={false}
       showUserAvatar={true}
       onSend={(messages: any) => onSend(messages)}
+      renderActions={renderCustomButton}
       messagesContainerStyle={{
         backgroundColor: '#fff',
       }}
